@@ -1,0 +1,58 @@
+# Credentials & Secrets
+api_key.txt
+*.key
+*.pem
+.env
+
+# Build artifacts
+*.pyc
+__pycache__/
+*.so
+*.egg-info/
+dist/
+build/
+*.spec
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+calling_agent.log
+
+# Reports & Data
+reports/
+*.xlsx
+*.xls
+numbers.xlsx
+
+# Audio files (optional - uncomment if you want to exclude)
+# *.mp3
+# *.wav
+# *.m4a
+
+# Gradle (Android)
+.gradle/
+gradle-temp/
+local.properties
+
+# Android build
+app/build/
+app/release/
+*.apk
+*.aab
+
+# Temp files
+*.tmp
+temp/
+platform-tools/
+adb.exe
+AdbWinApi.dll
+AdbWinUsbApi.dll
+
+# OS
+.DS_Store
+Thumbs.db

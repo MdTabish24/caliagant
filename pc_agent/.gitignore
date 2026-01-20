@@ -1,0 +1,15 @@
+# API Key - NEVER commit this
+api_key.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Temp files
+*.mp3
+*.wav
+
+# Local data
+call_data/
+results.xlsx
