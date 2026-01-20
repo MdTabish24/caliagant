@@ -3,6 +3,5 @@ edge-tts
 openpyxl
 SpeechRecognition
 pyaudio
-webrtcvad
 numpy
 librosa

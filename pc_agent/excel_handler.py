@@ -11,14 +11,17 @@ from config import OUTPUT_EXCEL, logger
 class ExcelHandler:
     def __init__(self):
         self.output_file = OUTPUT_EXCEL
+        logger.info(f"📊 Excel handler output path: {self.output_file}")
         self._init_file()
     
     def _init_file(self):
         """Initialize Excel file with headers"""
-        if os.path.exists(self.output_file):
-            return
-        
+        # Always ensure directory exists
         os.makedirs(os.path.dirname(self.output_file) or ".", exist_ok=True)
+        
+        if os.path.exists(self.output_file):
+            logger.info(f"📊 Excel file exists: {self.output_file}")
+            return
         
         wb = Workbook()
         ws = wb.active
@@ -44,7 +47,7 @@ class ExcelHandler:
         ws.column_dimensions['G'].width = 50
         
         wb.save(self.output_file)
-        logger.info(f"📊 Created: {self.output_file}")
+        logger.info(f"📊 Created Excel: {self.output_file}")
     
     def save_result(self, phone, duration, analysis, conversation):
         """Save call result"""

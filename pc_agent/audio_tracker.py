@@ -12,7 +12,7 @@ from config import logger
 class AudioTracker:
     def __init__(self, excel_path=None):
         if excel_path is None:
-            # Save in reports folder next to exe/script
+            # Save in results folder next to exe/script
             import sys
             if getattr(sys, 'frozen', False):
                 # Running as exe
@@ -21,15 +21,17 @@ class AudioTracker:
                 # Running as script
                 base_dir = os.path.dirname(os.path.abspath(__file__))
             
-            reports_dir = os.path.join(base_dir, "reports")
-            os.makedirs(reports_dir, exist_ok=True)
-            excel_path = os.path.join(reports_dir, "audio_tracking.xlsx")
+            results_dir = os.path.join(base_dir, "results")
+            os.makedirs(results_dir, exist_ok=True)
+            excel_path = os.path.join(results_dir, "audio_tracking.xlsx")
         self.excel_path = os.path.abspath(excel_path)
+        logger.info(f"📊 Audio tracker Excel path: {self.excel_path}")
         self._init_excel()
     
     def _init_excel(self):
         """Initialize Excel with headers"""
         if os.path.exists(self.excel_path):
+            logger.info(f"📊 Audio tracking Excel exists: {self.excel_path}")
             return
         
         wb = Workbook()
@@ -52,7 +54,7 @@ class AudioTracker:
         ws.column_dimensions['F'].width = 15
         
         wb.save(self.excel_path)
-        logger.info(f"📊 Audio tracking Excel created: {self.excel_path}")
+        logger.info(f"📊 Created audio tracking Excel: {self.excel_path}")
     
     def log_call(self, phone_number, audio_length, listened_time):
         """

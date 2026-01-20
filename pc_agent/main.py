@@ -763,13 +763,20 @@ class CallingAgent:
         )
         play_thread.start()
         
+        # Monitor for hangup while audio plays
         while play_thread.is_alive():
             if self._hangup_event.is_set():
+                logger.debug("🛑 Hangup detected - stopping audio")
                 self.tts.stop()
                 break
             time.sleep(0.1)
         
+        # Ensure thread is cleaned up
         play_thread.join(timeout=1)
+        
+        # Force stop if still playing
+        if self.tts._playing:
+            self.tts.stop()
     
     def _conversation_loop(self):
         """AI conversation loop"""

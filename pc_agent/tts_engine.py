@@ -56,17 +56,20 @@ class TTSEngine:
                     pass
             self._current_process = None
         
-        # Kill any ffplay processes
+        # Kill any ffplay processes (hidden window)
         try:
             subprocess.run(["taskkill", "/F", "/IM", "ffplay.exe"], 
-                          capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                          capture_output=True, 
+                          creationflags=subprocess.CREATE_NO_WINDOW)
         except:
             pass
         
-        # Kill PowerShell processes playing audio
+        # Kill PowerShell MediaPlayer processes (hidden window)
         try:
-            subprocess.run(["taskkill", "/F", "/FI", "IMAGENAME eq powershell.exe", "/FI", "WINDOWTITLE eq *MediaPlayer*"], 
-                          capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.run(["powershell", "-WindowStyle", "Hidden", "-Command", 
+                          "Get-Process | Where-Object {$_.MainWindowTitle -like '*MediaPlayer*'} | Stop-Process -Force"],
+                          capture_output=True,
+                          creationflags=subprocess.CREATE_NO_WINDOW)
         except:
             pass
         
@@ -206,19 +209,33 @@ class TTSEngine:
         
         logger.info(f"🔊 Playing: {os.path.basename(file_path)}")
         
+        # Try ffplay first (best, no popup)
         try:
             self._current_process = subprocess.Popen(
                 ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", file_path],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                stdout=subprocess.DEVNULL, 
+                stderr=subprocess.DEVNULL,
+                creationflags=subprocess.CREATE_NO_WINDOW  # Hide window
             )
-            self._current_process.wait(timeout=120)
+            
+            # Wait for process to finish or stop flag
+            while self._current_process.poll() is None:
+                if self._stop_flag:
+                    self._current_process.terminate()
+                    break
+                import time
+                time.sleep(0.1)
+            
             self._current_process = None
             self._playing = False
             return True
-        except:
+        except FileNotFoundError:
+            # ffplay not found, try PowerShell
             pass
+        except Exception as e:
+            logger.error(f"ffplay error: {e}")
         
-        # Fallback
+        # Fallback: PowerShell (hidden window)
         try:
             abs_path = os.path.abspath(file_path).replace("\\", "/")
             ps_script = f'''
@@ -232,7 +249,23 @@ class TTSEngine:
             Start-Sleep -Seconds ($p.NaturalDuration.TimeSpan.TotalSeconds + 0.5)
             $p.Close()
             '''
-            subprocess.run(["powershell", "-Command", ps_script], capture_output=True, timeout=120)
+            
+            self._current_process = subprocess.Popen(
+                ["powershell", "-WindowStyle", "Hidden", "-Command", ps_script],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=subprocess.CREATE_NO_WINDOW  # Hide window
+            )
+            
+            # Wait for process to finish or stop flag
+            while self._current_process.poll() is None:
+                if self._stop_flag:
+                    self._current_process.terminate()
+                    break
+                import time
+                time.sleep(0.1)
+            
+            self._current_process = None
             self._playing = False
             return True
         except Exception as e:

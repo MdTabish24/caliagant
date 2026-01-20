@@ -5,11 +5,26 @@ api_key.txt
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+
+# PyInstaller
+build/
+dist/
+*.spec
 
 # Temp files
 *.mp3
 *.wav
+calling_agent.log
 
 # Local data
 call_data/
-results.xlsx
+results/
+reports/
+platform-tools/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

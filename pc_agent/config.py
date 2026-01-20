@@ -153,6 +153,6 @@ def get_base_path():
         # Running as script
         return os.path.dirname(__file__)
 
-REPORTS_DIR = os.path.join(get_base_path(), "reports")
-os.makedirs(REPORTS_DIR, exist_ok=True)
-OUTPUT_EXCEL = os.path.join(REPORTS_DIR, "results.xlsx")
+RESULTS_DIR = os.path.join(get_base_path(), "results")
+os.makedirs(RESULTS_DIR, exist_ok=True)
+OUTPUT_EXCEL = os.path.join(RESULTS_DIR, "results.xlsx")
