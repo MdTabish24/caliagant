@@ -46,6 +46,11 @@ class MainActivity : AppCompatActivity() {
     private var currentIndex = 0
     private var currentNumber = ""
     private var isCalling = false
+    
+    // SharedPreferences for progress
+    private val PREFS_NAME = "CallingAgentPrefs"
+    private val KEY_CURRENT_INDEX = "currentIndex"
+    private val KEY_TOTAL_NUMBERS = "totalNumbers"
 
     // Components
     private lateinit var audioManager: AudioManager
@@ -170,12 +175,31 @@ class MainActivity : AppCompatActivity() {
             val numbers = ExcelReader.readPhoneNumbers(this, uri)
             phoneNumbers.clear()
             phoneNumbers.addAll(numbers)
-            updateStatus("✅ Loaded ${phoneNumbers.size} numbers")
-            updateCurrentNumber("Ready to call")
+            
+            // Load saved progress
+            val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val savedTotal = prefs.getInt(KEY_TOTAL_NUMBERS, 0)
+            val savedIndex = prefs.getInt(KEY_CURRENT_INDEX, 0)
+            
+            // If same file (same total), resume from saved index
+            if (savedTotal == phoneNumbers.size && savedIndex > 0 && savedIndex < phoneNumbers.size) {
+                currentIndex = savedIndex
+                updateStatus("✅ Loaded ${phoneNumbers.size} numbers (Resume from #$currentIndex)")
+                updateCurrentNumber("Ready to resume from #$currentIndex")
+                Toast.makeText(this, "Resume from number #$currentIndex", Toast.LENGTH_LONG).show()
+                Log.i(TAG, "Resuming from index $currentIndex")
+            } else {
+                // New file or completed - start fresh
+                currentIndex = 0
+                prefs.edit().clear().apply()
+                updateStatus("✅ Loaded ${phoneNumbers.size} numbers")
+                updateCurrentNumber("Ready to call")
+                Toast.makeText(this, "${phoneNumbers.size} numbers loaded", Toast.LENGTH_SHORT).show()
+                Log.i(TAG, "Starting fresh - ${phoneNumbers.size} numbers")
+            }
+            
             updateNumbersCount("📊 ${phoneNumbers.size} numbers loaded")
             startCallingBtn.isEnabled = phoneNumbers.isNotEmpty()
-            Toast.makeText(this, "${phoneNumbers.size} numbers loaded", Toast.LENGTH_SHORT).show()
-            Log.i(TAG, "Loaded ${phoneNumbers.size} numbers")
         } catch (e: Exception) {
             Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             Log.e(TAG, "Excel load error", e)
@@ -197,7 +221,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         isCalling = true
-        currentIndex = 0
+        
+        // Save total numbers count
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_TOTAL_NUMBERS, phoneNumbers.size).apply()
         
         startService(Intent(this, CallingService::class.java).apply {
             action = CallingService.ACTION_START
@@ -207,8 +234,8 @@ class MainActivity : AppCompatActivity() {
         stopBtn.isEnabled = true
         selectExcelBtn.isEnabled = false
         
-        updateStatus("🚀 Calling started!")
-        Log.i(TAG, "Starting calls - ${phoneNumbers.size} numbers")
+        updateStatus("🚀 Calling started from #$currentIndex!")
+        Log.i(TAG, "Starting calls from index $currentIndex - ${phoneNumbers.size} total")
         
         callNextNumber()
     }
@@ -236,6 +263,10 @@ class MainActivity : AppCompatActivity() {
         if (currentIndex >= phoneNumbers.size) {
             isCalling = false
             
+            // Clear saved progress - all done!
+            val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit().clear().apply()
+            
             startService(Intent(this, CallingService::class.java).apply {
                 action = CallingService.ACTION_STOP
             })
@@ -252,6 +283,10 @@ class MainActivity : AppCompatActivity() {
 
         currentNumber = phoneNumbers[currentIndex]
         currentIndex++
+        
+        // Save progress after each call
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_CURRENT_INDEX, currentIndex).apply()
 
         Log.i(TAG, "📞 Calling: $currentNumber ($currentIndex/${phoneNumbers.size})")
         updateCurrentNumber("📞 $currentNumber ($currentIndex/${phoneNumbers.size})")

@@ -277,6 +277,22 @@ class ADBCallDetector:
                     print(f"   [DEBUG] State: {new_state.value}", end='\r')
                 
                 with self._lock:
+                    # Check for ringing timeout (30 seconds)
+                    if self.current_state == USBCallState.RINGING and self.ring_start_time:
+                        ring_duration = time.time() - self.ring_start_time
+                        if ring_duration > 30:  # 30 seconds timeout
+                            print(f"\n⏰ RINGING TIMEOUT (30s) - Call not picked/busy")
+                            logger.info("⏰ Ringing timeout - triggering next call")
+                            # Trigger next call
+                            self.hang_up_call()
+                            # Reset to idle
+                            self.current_state = USBCallState.IDLE
+                            self._last_state = USBCallState.IDLE
+                            self.ring_count = 0
+                            self.ring_start_time = None
+                            self.current_number = ""
+                    
+                    # Handle state changes
                     if new_state != self._last_state:
                         self._handle_state_change(new_state)
                         self._last_state = new_state
@@ -316,21 +332,6 @@ class ADBCallDetector:
                     self.on_ringing(self.current_number, self.ring_count)
                 
                 self.current_state = new_state
-            
-            # Check for ringing timeout (30 seconds) - busy/not picked
-            elif self.current_state == USBCallState.RINGING:
-                if self.ring_start_time:
-                    ring_duration = time.time() - self.ring_start_time
-                    if ring_duration > 30:  # 30 seconds timeout
-                        print(f"⏰ RINGING TIMEOUT (30s) - Call not picked/busy")
-                        logger.info("⏰ Ringing timeout - triggering next call")
-                        # Trigger next call
-                        self.hang_up_call()
-                        # Reset to idle
-                        self.current_state = USBCallState.IDLE
-                        self.ring_count = 0
-                        self.ring_start_time = None
-                        self.current_number = ""
         
         elif new_state == USBCallState.ACTIVE:
             if self.current_state in [USBCallState.RINGING, USBCallState.DIALING, USBCallState.IDLE]:
@@ -355,10 +356,18 @@ class ADBCallDetector:
                 print(f"📴 CALL ENDED | Time: {current_time}")
                 logger.info("📴 CALL ENDED")
                 
+                # Check if call was not picked (RINGING -> IDLE)
+                was_not_picked = self.current_state == USBCallState.RINGING
+                
                 self.current_state = new_state
                 
                 if self.on_hangup:
                     self.on_hangup()
+                
+                # If call was not picked, trigger next call
+                if was_not_picked:
+                    logger.info("📞 Call not picked - triggering next call")
+                    self.hang_up_call()
                 
                 self.ring_count = 0
                 self.ring_start_time = None
