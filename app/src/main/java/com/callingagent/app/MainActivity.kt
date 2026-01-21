@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
     private var currentIndex = 0
     private var currentNumber = ""
     private var isCalling = false
+    private var lastCallTime = 0L
     
     // SharedPreferences for progress
     private val PREFS_NAME = "CallingAgentPrefs"
@@ -243,6 +244,13 @@ class MainActivity : AppCompatActivity() {
     private fun stopCalling() {
         isCalling = false
         
+        // Save current progress before stopping
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_CURRENT_INDEX, currentIndex)
+            .putInt(KEY_TOTAL_NUMBERS, phoneNumbers.size)
+            .apply()
+        
         startService(Intent(this, CallingService::class.java).apply {
             action = CallingService.ACTION_STOP
         })
@@ -252,9 +260,10 @@ class MainActivity : AppCompatActivity() {
         startCallingBtn.isEnabled = true
         stopBtn.isEnabled = false
         selectExcelBtn.isEnabled = true
-        updateStatus("⛔ Stopped")
-        updateCurrentNumber("Stopped at $currentIndex/${phoneNumbers.size}")
-        Log.i(TAG, "Calling stopped")
+        updateStatus("⛔ Stopped at #$currentIndex")
+        updateCurrentNumber("Paused at $currentIndex/${phoneNumbers.size}")
+        Toast.makeText(this, "Paused at #$currentIndex - Resume anytime!", Toast.LENGTH_LONG).show()
+        Log.i(TAG, "Calling paused at index $currentIndex")
     }
 
     private fun callNextNumber() {
@@ -306,6 +315,22 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save number: ${e.message}")
         }
+
+        // Track call start time
+        lastCallTime = System.currentTimeMillis()
+        
+        // Set timeout - if call not active in 20 seconds, move to next
+        handler.postDelayed({
+            if (isCalling && currentNumber == number) {
+                val elapsed = System.currentTimeMillis() - lastCallTime
+                if (elapsed >= 20000) {
+                    Log.i(TAG, "⏰ Call timeout (20s) - moving to next: $number")
+                    updateStatus("⏰ Timeout - Next call")
+                    endCurrentCall()
+                    handler.postDelayed({ callNextNumber() }, 2000)
+                }
+            }
+        }, 20000)
 
         // NO speaker mode - audio goes to audio card/earpiece
         
