@@ -215,13 +215,16 @@ class TTSEngine:
                 ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", file_path],
                 stdout=subprocess.DEVNULL, 
                 stderr=subprocess.DEVNULL,
-                creationflags=subprocess.CREATE_NO_WINDOW  # Hide window
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
             
             # Wait for process to finish or stop flag
-            while self._current_process.poll() is None:
+            while self._current_process and self._current_process.poll() is None:
                 if self._stop_flag:
-                    self._current_process.terminate()
+                    try:
+                        self._current_process.terminate()
+                    except:
+                        pass
                     break
                 import time
                 time.sleep(0.1)
@@ -230,12 +233,11 @@ class TTSEngine:
             self._playing = False
             return True
         except FileNotFoundError:
-            # ffplay not found, try PowerShell
             pass
         except Exception as e:
             logger.error(f"ffplay error: {e}")
         
-        # Fallback: PowerShell (hidden window)
+        # Fallback: PowerShell
         try:
             abs_path = os.path.abspath(file_path).replace("\\", "/")
             ps_script = f'''
@@ -254,13 +256,16 @@ class TTSEngine:
                 ["powershell", "-WindowStyle", "Hidden", "-Command", ps_script],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                creationflags=subprocess.CREATE_NO_WINDOW  # Hide window
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
             
             # Wait for process to finish or stop flag
-            while self._current_process.poll() is None:
+            while self._current_process and self._current_process.poll() is None:
                 if self._stop_flag:
-                    self._current_process.terminate()
+                    try:
+                        self._current_process.terminate()
+                    except:
+                        pass
                     break
                 import time
                 time.sleep(0.1)

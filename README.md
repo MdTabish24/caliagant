@@ -8,6 +8,8 @@ Auto-dialer Android app jo Excel se numbers read karke automatically call karta 
 - Background me chale (Foreground Service)
 - Call connect hone pe audio recording play kare
 - Ek ke baad ek automatically call kare
+- **WhatsApp Auto Message** - Call ke baad automatically WhatsApp message bheje
+- **Media Support** - WhatsApp me image/file attach karke bheje
 - AI conversation mode (optional)
 - Excel reports with color coding
 
@@ -60,14 +62,19 @@ CallingAgent.exe
 - READ_PHONE_STATE - Call state detect karne ke liye
 - Storage - Excel file read karne ke liye
 - Overlay - Background me kaam karne ke liye
+- **WhatsApp installed** - Auto message feature ke liye
 
 ## Usage
 1. App open karo
 2. Permissions allow karo
 3. Excel file select karo (first column = phone numbers)
-4. Audio recording select karo
-5. "CALLING SHURU KARO" dabao
+4. **WhatsApp Auto Message (Optional):**
+   - Toggle ON karo
+   - Message type karo
+   - Media file select karo (optional)
+5. "START CALLING" dabao
 6. App minimize hoke background me chalegi
+7. **Call ke baad automatically WhatsApp open hoga** with pre-filled message
 
 ## Excel Format
 | Phone Number | Name (optional) | Other columns... |

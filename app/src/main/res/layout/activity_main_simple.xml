@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#1a1a2e"
+    android:fillViewport="true">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#1a1a2e">
+    android:padding="16dp">
 
     <TextView
         android:layout_width="match_parent"
@@ -95,18 +100,23 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="1. Excel file select karo\n2. Start Calling button dabao\n3. Automatic calling shuru ho jayegi\n4. AT Telecom se direct calling"
+                android:text="1. Enable Call Detection (button below)\n2. Excel file select karo\n3. PC se audio play hoga\n4. Start Calling button dabao"
                 android:textSize="12sp"
                 android:textColor="#cccccc"
                 android:lineSpacingExtra="4dp"/>
 
+            <Button
+                android:id="@+id/enableCallDetectionBtn"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="⚙️ Enable Call Detection"
+                android:textSize="12sp"
+                android:backgroundTint="#e94560"
+                android:textColor="#ffffff"
+                android:layout_marginTop="8dp"/>
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
 
     <!-- Buttons -->
     <Button
@@ -139,6 +149,88 @@
         android:backgroundTint="#e94560"
         android:textColor="#ffffff"/>
 
+    <!-- WhatsApp Auto Message Section -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:cardBackgroundColor="#16213e"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="💬 WhatsApp Auto Message"
+                    android:textSize="14sp"
+                    android:textColor="#00ff88"/>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/whatsappToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/whatsappOptionsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/whatsappMessageInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Message text..."
+                    android:textColorHint="#666666"
+                    android:textColor="#ffffff"
+                    android:textSize="13sp"
+                    android:background="@drawable/edit_text_bg"
+                    android:padding="10dp"
+                    android:minLines="2"
+                    android:maxLines="4"
+                    android:gravity="top"
+                    android:layout_marginBottom="8dp"/>
+
+                <Button
+                    android:id="@+id/selectMediaBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:text="🧪 Test WhatsApp / 📎 Select Media"
+                    android:textSize="11sp"
+                    android:backgroundTint="#0f3460"
+                    android:textColor="#ffffff"/>
+
+                <TextView
+                    android:id="@+id/selectedMediaText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No media selected"
+                    android:textSize="11sp"
+                    android:textColor="#888888"
+                    android:layout_marginTop="4dp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -146,6 +238,7 @@
         android:textSize="11sp"
         android:textColor="#666666"
         android:gravity="center"
-        android:layout_marginTop="12dp"/>
+        android:layout_marginTop="8dp"/>
 
 </LinearLayout>
+</ScrollView>

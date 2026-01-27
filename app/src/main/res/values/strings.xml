@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Calling Agent</string>
+    <string name="accessibility_service_description">Auto-send WhatsApp messages after calls. This service only works when WhatsApp is open and does not collect any personal data.</string>
 </resources>

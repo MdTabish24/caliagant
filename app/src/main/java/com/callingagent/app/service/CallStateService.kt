@@ -42,8 +42,9 @@ class CallStateService : InCallService() {
         
         Log.i(TAG, "📞 Call ADDED: $number | Outgoing: $isOutgoing")
         
-        // Initial state
-        handleCallState(call, call.state)
+        // Initial state - use details.state instead of call.state
+        val initialState = call.details?.state ?: Call.STATE_NEW
+        handleCallState(call, initialState)
     }
     
     override fun onCallRemoved(call: Call) {
@@ -53,7 +54,9 @@ class CallStateService : InCallService() {
         val number = call.details?.handle?.schemeSpecificPart ?: "Unknown"
         val isOutgoing = call.details?.callDirection == Call.Details.DIRECTION_OUTGOING
         
-        Log.i(TAG, "📴 Call REMOVED: $number")
+        Log.i(TAG, "📴 Call REMOVED: $number | Outgoing: $isOutgoing")
+        Log.i(TAG, "🔔 Triggering DISCONNECTED callback...")
+        
         onCallStateChanged?.invoke(STATE_DISCONNECTED, number, isOutgoing)
         
         currentCall = null
